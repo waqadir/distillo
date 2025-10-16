@@ -1,0 +1,78 @@
+# Example configuration for Reinforcement Learning (RL) Training
+# This demonstrates on-policy training with KL supervision
+
+server:
+  base_url: "http://localhost:9000"
+  api_key: null
+  verify_tls: true
+  request_timeout: 300.0  # Longer timeout for training
+
+job:
+  # Student model - the model being trained
+  model:
+    provider: "vllm"  # Can also use local transformers
+    name: "Qwen/Qwen3-VL-8B-Instruct"
+    parameters:
+      tensor_parallel_size: 1
+      gpu_memory_utilization: 0.8  # Leave room for gradients
+      dtype: "bfloat16"  # Better for training
+
+  # Training data source
+  source:
+    dataset: "HuggingFaceH4/ultrachat_200k"
+    split: "train_sft"
+    field: "messages"
+    streaming: false
+
+  # Generation and training configuration
+  generation:
+    duplications: 1
+    max_batch_size: 4  # Smaller batches for training
+    seed: 42
+
+    # Enable on-policy RL training
+    on_policy: true
+
+    # On-policy training options
+    on_policy_options:
+      # Teacher model for supervision
+      teacher: "gpt-5"  # High-quality teacher model
+      api_key: "your-openai-api-key"  # Or set OPENAI_API_KEY env var
+
+      # Training hyperparameters
+      learning_rate: 5.0e-5
+      groups_per_batch: 256  # Number of prompt-completion groups per batch
+      group_size: 4  # Number of completions per prompt
+      max_tokens: 2048  # Maximum tokens per generation
+
+      # LoRA configuration
+      lora_rank: 16  # Lower rank = fewer parameters, faster training
+      # lora_rank options: 8 (very fast), 16 (balanced), 32 (high quality)
+
+      # Loss function selection
+      loss_fn: "ppo"  # Options: "ppo" or "importance_sampling"
+      # - ppo: Proximal Policy Optimization (more stable)
+      # - importance_sampling: Simpler, may be faster
+
+      # KL divergence penalty
+      kl_penalty_coef: 0.1  # Higher = closer to teacher, lower = more exploration
+      # Recommended range: 0.01 - 0.5
+
+      # Evaluation and checkpointing
+      compute_post_kl: true  # Compute KL after training for metrics
+      eval_every: 50  # Evaluate every N steps
+      save_every: 100  # Save checkpoint every N steps
+
+  # Output configuration
+  output:
+    mode: "local_file"  # Save trained model locally
+    local_path: "./output/trained_model"
+    format: "pytorch"  # Model checkpoint format
+
+  # Experiment metadata
+  metadata:
+    experiment_name: "rl_training_qwen_gpt5"
+    description: "RL training with PPO and KL supervision"
+    student_model: "Qwen3-VL-8B-Instruct"
+    teacher_model: "gpt-5"
+    algorithm: "ppo"

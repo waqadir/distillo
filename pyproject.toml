@@ -1,0 +1,114 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "distillo"
+version = "0.1.0"
+description = "Lightweight on/off-policy distillation framework for training data generation"
+authors = [
+    {name = "Waqar Qadir", email = "waqar@example.com"},
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+keywords = ["llm", "ml", "data", "distillation", "synthetic-data", "training"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+client = [
+    "httpx>=0.25.0",
+    "requests>=2.31.0",
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+]
+
+server = [
+    "datasets>=2.14.0",
+    "pyarrow>=14.0.0",
+    "pandas>=2.0.0",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "python-multipart>=0.0.6",
+    "vllm>=0.2.0",
+    "huggingface-hub>=0.19.0",
+    "numpy>=1.24.0",
+    "torch>=2.1.0",
+    "transformers>=4.35.0",
+]
+
+rl = [
+    "torch>=2.1.0",
+    "transformers>=4.35.0",
+    "peft>=0.7.0",
+    "accelerate>=0.25.0",
+    "bitsandbytes>=0.41.0",
+    "scipy>=1.11.0",
+    "sentencepiece>=0.1.99",
+    "protobuf>=4.25.0",
+]
+
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+]
+
+all = [
+    "distillo[client,server,rl,dev]",
+]
+
+[project.scripts]
+distillo = "distillo.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/waqadir/distillo"
+Documentation = "https://github.com/waqadir/distillo/blob/main/README.md"
+Repository = "https://github.com/waqadir/distillo"
+Issues = "https://github.com/waqadir/distillo/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["distillo", "server"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]  # Line too long (handled by black)
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]  # Unused imports in __init__ files
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=distillo --cov=server --cov-report=term-missing"

@@ -1,0 +1,49 @@
+# Example configuration for OpenAI backend
+# This demonstrates using OpenAI API for data generation
+
+server:
+  base_url: "http://localhost:9000"
+  api_key: null
+  verify_tls: true
+  request_timeout: 60.0
+
+job:
+  # Model configuration - using OpenAI API
+  model:
+    provider: "openai"
+    name: "gpt-5"
+    parameters:
+      api_key: "your-openai-api-key"  # Or set OPENAI_API_KEY env var
+
+  # Data source
+  source:
+    dataset: "tatsu-lab/alpaca"
+    split: "train"
+    field: "instruction"
+    streaming: false
+
+  # Generation configuration
+  generation:
+    duplications: 1
+    max_batch_size: 16  # Smaller batches for API calls
+    seed: null
+    parameters:
+      temperature: 0.8
+      top_p: 0.95
+      max_tokens: 1024
+    on_policy: false
+
+  # Output configuration - upload to HuggingFace
+  output:
+    mode: "upload_hf"
+    format: "jsonl"
+    hf:
+      repo_id: "your-username/distilled-alpaca"
+      config_name: null
+      token: "your-hf-token"
+      private: true
+      commit_message: "Add distilled dataset"
+
+  metadata:
+    experiment_name: "alpaca_distillation"
+    model: "gpt-5"

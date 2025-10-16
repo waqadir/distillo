@@ -1,0 +1,46 @@
+# Example configuration for Anthropic (Claude) backend
+# This demonstrates using Claude Sonnet 4.5 for data generation
+
+server:
+  base_url: "http://localhost:9000"
+  api_key: null
+  verify_tls: true
+  request_timeout: 60.0
+
+job:
+  # Model configuration - using Anthropic Claude API
+  model:
+    provider: "anthropic"
+    name: "claude-sonnet-4-5-20250929"  # Claude Sonnet 4.5
+    parameters:
+      api_key: "your-anthropic-api-key"  # Or set ANTHROPIC_API_KEY env var
+
+  # Data source
+  source:
+    dataset: "tatsu-lab/alpaca"
+    split: "train"
+    field: "instruction"
+    streaming: false
+
+  # Generation configuration
+  generation:
+    duplications: 1
+    max_batch_size: 16  # Smaller batches for API calls
+    seed: null
+    parameters:
+      temperature: 0.8
+      top_p: 0.95
+      max_tokens: 2048
+      top_k: 40
+    on_policy: false
+
+  # Output configuration - upload to HuggingFace
+  output:
+    mode: "local_file"
+    local_path: "./output/claude_result.jsonl"
+    format: "jsonl"
+
+  metadata:
+    experiment_name: "claude_distillation"
+    model: "claude-sonnet-4.5"
+    description: "High-quality distillation using Claude Sonnet 4.5"

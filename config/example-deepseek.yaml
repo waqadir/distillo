@@ -1,0 +1,45 @@
+# Example configuration for DeepSeek backend
+# DeepSeek provides cost-effective Chinese AI models with OpenAI-compatible API
+
+server:
+  base_url: "http://localhost:9000"
+  api_key: null
+  verify_tls: true
+  request_timeout: 60.0
+
+job:
+  # Model configuration - using DeepSeek API
+  model:
+    provider: "deepseek"
+    name: "deepseek-chat"  # or "deepseek-reasoner" for reasoning tasks
+    parameters:
+      api_key: "your-deepseek-api-key"  # Or set DEEPSEEK_API_KEY env var
+
+  # Data source
+  source:
+    dataset: "tatsu-lab/alpaca"
+    split: "train"
+    field: "instruction"
+    streaming: false
+
+  # Generation configuration
+  generation:
+    duplications: 1
+    max_batch_size: 16  # Smaller batches for API calls
+    seed: null
+    parameters:
+      temperature: 0.7
+      top_p: 0.95
+      max_tokens: 2048
+    on_policy: false
+
+  # Output configuration
+  output:
+    mode: "local_file"
+    local_path: "./output/deepseek_result.jsonl"
+    format: "jsonl"
+
+  metadata:
+    experiment_name: "deepseek_distillation"
+    model: "deepseek-chat"
+    description: "Cost-effective distillation with DeepSeek"

@@ -1,0 +1,51 @@
+# Example configuration for vLLM backend
+# This demonstrates off-policy distillation using a local vLLM model
+
+server:
+  base_url: "http://localhost:9000"
+  api_key: null  # Set if server requires authentication
+  verify_tls: true
+  request_timeout: 30.0
+
+job:
+  # Model configuration - using vLLM for local inference
+  model:
+    provider: "vllm"
+    name: "Qwen/Qwen3-VL-8B-Instruct"
+    parameters:
+      tensor_parallel_size: 1
+      gpu_memory_utilization: 0.9
+      dtype: "auto"
+      max_model_len: 8192
+
+  # Data source - HuggingFace dataset
+  source:
+    dataset: "HuggingFaceH4/ultrachat_200k"
+    config_name: null
+    split: "train_sft"
+    field: "messages"  # Extract specific field from records
+    streaming: false
+    revision: null
+
+  # Generation configuration
+  generation:
+    duplications: 1  # Number of completions per prompt
+    max_batch_size: 32
+    seed: 42
+    parameters:
+      temperature: 0.7
+      top_p: 0.9
+      max_tokens: 2048
+      stop: ["</s>", "<|endoftext|>"]
+    on_policy: false  # Set to true for on-policy training
+
+  # Output configuration
+  output:
+    mode: "local_file"  # Options: return, local_file, upload_hf
+    local_path: "./output/result.jsonl"
+    format: "jsonl"  # Options: jsonl, json, parquet
+
+  # Optional metadata
+  metadata:
+    experiment_name: "distillation_test"
+    description: "Testing vLLM backend with Qwen model"
